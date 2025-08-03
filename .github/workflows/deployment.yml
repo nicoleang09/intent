@@ -1,0 +1,71 @@
+name: Deployment
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x, 16.x]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: './backend/package-lock.json'
+    - run: npm ci
+    - run: npm run build --if-present
+    - run: npm test
+  deploy-backend:
+    needs: build-backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+    - uses: actions/checkout@v3
+    - uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+        heroku_app_name: "life-dashboard-api"
+        heroku_email: "nicolenikiang@gmail.com"
+  
+  build-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    strategy:
+      matrix:
+        node-version: [16.x, 14.x, 12.x]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: './frontend/package-lock.json'
+    - run: npm ci
+    - run: npm run build --if-present
+    - run: npm test
+  deploy-frontend:
+    needs: build-frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+    - uses: actions/checkout@v3
+    - uses: netlify/actions/cli@master
+      with:
+        args: deploy --dir=build --prod
+        secrets: '[${{secrets.NETLIFY_TOKEN}}, ${{secrets.NETLIFY_SITE_ID}}]'
