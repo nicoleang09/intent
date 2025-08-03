@@ -3,7 +3,7 @@ import { TypographyOptions } from '@mui/material/styles/createTypography';
 declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides {
     widgetText: true;
-    smallText: true
+    smallText: true;
   }
 }
 
@@ -41,22 +41,22 @@ export const lightTheme = {
   } as ExtendedTypographyOptions,
   palette: {
     primary: {
-      main: "#96C6FF"
+      main: '#96C6FF',
     },
     secondary: {
-      main: "#FF8A8A"
+      main: '#FF8A8A',
     },
-    textGrey: "#9D9D9D",
-    accent1: "#96C6FF",
-    accent2: "#FF8A8A",
-    accent3: "#FFFCB7",
-    widgetBg: "#FFFFFF80",
-    primaryText: "#000000",
+    textGrey: '#9D9D9D',
+    accent1: '#96C6FF',
+    accent2: '#FF8A8A',
+    accent3: '#FFFCB7',
+    widgetBg: '#FFFFFF80',
+    primaryText: '#000000',
   },
   overrides: {
     MuiButton: {
       iconSizeSmall: {
-        "& > *:first-child": {
+        '& > *:first-child': {
           fontSize: 12,
         },
       },
@@ -81,22 +81,22 @@ export const darkTheme = {
   } as ExtendedTypographyOptions,
   palette: {
     primary: {
-      main: "#857DE4"
+      main: '#857DE4',
     },
     secondary: {
-      main: "#E48181"
+      main: '#E48181',
     },
-    textGrey: "#9D9D9D",
-    accent1: "#857DE4",
-    accent2: "#E48181",
-    accent3: "#F5D19B",
-    widgetBg: "#454B60",
-    primaryText: "#FFFFFF",
+    textGrey: '#9D9D9D',
+    accent1: '#857DE4',
+    accent2: '#E48181',
+    accent3: '#F5D19B',
+    widgetBg: '#454B60',
+    primaryText: '#FFFFFF',
   },
   overrides: {
     MuiButton: {
       iconSizeSmall: {
-        "& > *:first-child": {
+        '& > *:first-child': {
           fontSize: 12,
         },
       },

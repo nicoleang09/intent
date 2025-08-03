@@ -1,8 +1,17 @@
 import '../App.css';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { lightTheme } from '../Theme'
+import { lightTheme } from '../Theme';
 import { useEffect, useState } from 'react';
-import { Typography, Grid, TextField, Select, MenuItem, Box, FormControl, InputLabel } from '@mui/material';
+import {
+  Typography,
+  Grid,
+  TextField,
+  Select,
+  MenuItem,
+  Box,
+  FormControl,
+  InputLabel,
+} from '@mui/material';
 import { DialogBox, DottedButton, WidgetBox } from './ReusableComponents';
 import ScheduleSlot from './ScheduleSlot';
 import { DragDropContext } from 'react-beautiful-dnd';
@@ -14,18 +23,18 @@ import AddIcon from '@mui/icons-material/Add';
 
 interface TimeBlockProps {
   cookie?: string;
-};
+}
 
 function TimeBlock(props: TimeBlockProps) {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [schedules, setSchedules] = useState<TaskMap>(scheduleData);
-  const [newScheduleHour, setNewScheduleHour] = useState("");
-  const [newScheduleName, setNewScheduleName] = useState("");
+  const [newScheduleHour, setNewScheduleHour] = useState('');
+  const [newScheduleName, setNewScheduleName] = useState('');
 
   useEffect(() => {
     if (!props.cookie) return;
 
-    getAllSchedules(props.cookie).then(allTasks => setSchedules(allTasks));
+    getAllSchedules(props.cookie).then((allTasks) => setSchedules(allTasks));
   }, [props.cookie]);
 
   const handleOnDragEnd = (res: any) => {
@@ -38,14 +47,14 @@ function TimeBlock(props: TimeBlockProps) {
 
   const updateTaskCompleted = (taskId: string, completed: boolean) => {
     const data = {
-      "updatedCompleted": completed,
-    }
-  
-    fetch(apiUrl + "/schedules/" + taskId, {
-      method: "POST",
-      mode: "cors",
+      updatedCompleted: completed,
+    };
+
+    fetch(apiUrl + '/schedules/' + taskId, {
+      method: 'POST',
+      mode: 'cors',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
     });
@@ -55,19 +64,19 @@ function TimeBlock(props: TimeBlockProps) {
     let schedulesArr = Object.entries(schedules);
     let dailyTaskList = schedulesArr.find(([key, val]) => {
       let dailyTasks = val;
-      let taskWanted = dailyTasks.find(task => task.id === id);
+      let taskWanted = dailyTasks.find((task) => task.id === id);
       return taskWanted !== undefined;
     });
 
     if (!dailyTaskList) return;
-    
-    let taskIdx = dailyTaskList[1].findIndex(t => t.id === id);
-    let isTaskCompleted = dailyTaskList[1][taskIdx].completed;
-    dailyTaskList[1][taskIdx].completed = !isTaskCompleted;
+
+    let taskIdx = dailyTaskList[1].findIndex((t) => t.id === id);
+    let isTaskCompleted = dailyTaskList[1][taskIdx].isCompleted;
+    dailyTaskList[1][taskIdx].isCompleted = !isTaskCompleted;
 
     let updatedTasks = {
       ...schedules,
-      [dailyTaskList[0]]: dailyTaskList[1]
+      [dailyTaskList[0]]: dailyTaskList[1],
     };
 
     updateTaskCompleted(id, !isTaskCompleted);
@@ -75,8 +84,14 @@ function TimeBlock(props: TimeBlockProps) {
   };
 
   const dialogActions = [
-    {name: "Cancel", action: () => setDialogOpen(false)},
-    {name: "Add", action: () => {handleAddSchedule(newScheduleName, newScheduleHour); setDialogOpen(false);}}
+    { name: 'Cancel', action: () => setDialogOpen(false) },
+    {
+      name: 'Add',
+      action: () => {
+        handleAddSchedule(newScheduleName, newScheduleHour);
+        setDialogOpen(false);
+      },
+    },
   ];
 
   const handleClose = () => {
@@ -84,8 +99,8 @@ function TimeBlock(props: TimeBlockProps) {
   };
 
   const showDialog = () => {
-    setNewScheduleHour("");
-    setNewScheduleName("");
+    setNewScheduleHour('');
+    setNewScheduleName('');
     setDialogOpen(true);
   };
 
@@ -96,17 +111,17 @@ function TimeBlock(props: TimeBlockProps) {
     console.log('new schedule hour: ' + hour);
     if (schedules['h' + hour].length !== 0) return;
 
-    const data = {name: name, hour: hour};
-    await fetch(apiUrl + "/userschedules/" + props.cookie, {
-      method: "POST",
-      mode: "cors",
+    const data = { title: name, hour: hour };
+    await fetch(apiUrl + '/userschedules/' + props.cookie, {
+      method: 'POST',
+      mode: 'cors',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
     });
 
-    getAllSchedules(props.cookie).then(allTasks => setSchedules(allTasks));
+    getAllSchedules(props.cookie).then((allTasks) => setSchedules(allTasks));
   };
 
   let theme = createTheme(lightTheme);
@@ -114,9 +129,21 @@ function TimeBlock(props: TimeBlockProps) {
   return (
     <ThemeProvider theme={theme}>
       <WidgetBox>
-        <Grid container direction={"row"} alignItems={"center"} marginBottom={"0.5rem"}>
-          <Typography variant="h3" marginRight={"0.5rem"}>Today...</Typography>
-          <DottedButton onClick={showDialog}><AddIcon fontSize="small" /> Add</DottedButton>
+        <Grid
+          container
+          direction={'row'}
+          alignItems={'center'}
+          marginBottom={'0.5rem'}
+        >
+          <Typography
+            variant="h3"
+            marginRight={'0.5rem'}
+          >
+            Today...
+          </Typography>
+          <DottedButton onClick={showDialog}>
+            <AddIcon fontSize="small" /> Add
+          </DottedButton>
         </Grid>
 
         <Grid container>
@@ -136,7 +163,7 @@ function TimeBlock(props: TimeBlockProps) {
 
       <DialogBox
         open={isDialogOpen}
-        dialogTitle={"Adding new schedule..."}
+        dialogTitle={'Adding new schedule...'}
         dialogContent={
           <Box>
             <TextField
@@ -144,8 +171,8 @@ function TimeBlock(props: TimeBlockProps) {
               label="Task name"
               fullWidth
               variant="standard"
-              onChange={d => setNewScheduleName(d.currentTarget.value)}
-              sx={{marginBottom: "1rem"}}
+              onChange={(d) => setNewScheduleName(d.currentTarget.value)}
+              sx={{ marginBottom: '1rem' }}
             />
             <FormControl fullWidth>
               <InputLabel id="hour-label">Hour</InputLabel>
@@ -155,11 +182,20 @@ function TimeBlock(props: TimeBlockProps) {
                 id="hour-selection"
                 value={newScheduleHour}
                 label="Hour"
-                onChange={event => setNewScheduleHour(event.target.value as string)}
-                sx={{textAlign: "left"}}
+                onChange={(event) =>
+                  setNewScheduleHour(event.target.value as string)
+                }
+                sx={{ textAlign: 'left' }}
               >
                 {hourList.map((hour) => {
-                  return <MenuItem value={hour} key={hour}>{hour}</MenuItem>
+                  return (
+                    <MenuItem
+                      value={hour}
+                      key={hour}
+                    >
+                      {hour}
+                    </MenuItem>
+                  );
                 })}
               </Select>
             </FormControl>

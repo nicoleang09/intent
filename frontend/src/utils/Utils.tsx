@@ -6,7 +6,7 @@ export const hourList = ["0700", "0800", "0900",
   "1600", "1700", "1800", "1900", "2000", "2100",
   "2200", "2300"];
 
-export const apiUrl = process.env.API_URL;
+export const apiUrl = process.env.REACT_APP_API_URL;
 
 export const getCookie = async () => {
   let cookie;

@@ -1,5 +1,5 @@
-import { apiUrl, dayList } from "./Utils";
-import { TaskMap } from "./Types";
+import { apiUrl, dayList } from './Utils';
+import { TaskMap } from './Types';
 
 const days = dayList;
 
@@ -14,9 +14,9 @@ export const taskData = {
 };
 
 export const getAllTasks = async (username: string) => {
-  let tasks:TaskMap = {};
+  let tasks: TaskMap = {};
 
-  const res = await fetch(apiUrl + "/usertasks/" + username);
+  const res = await fetch(apiUrl + '/usertasks/' + username);
   const allTasks = await res.json();
 
   days.forEach((day) => {
@@ -25,10 +25,17 @@ export const getAllTasks = async (username: string) => {
 
   for (let task in allTasks) {
     allTasks[task].id = allTasks[task].id.toString();
-    let dayId = allTasks[task].day_id;
-    let dayName = days[dayId - 1];
+    let dayName = toTitleCase(allTasks[task].day);
     tasks[dayName].push(allTasks[task]);
   }
 
   return tasks;
-}
+};
+
+const toTitleCase = (str: string) => {
+  return str.replace(
+    /\w\S*/g,
+    (text: string) =>
+      text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
+  );
+};

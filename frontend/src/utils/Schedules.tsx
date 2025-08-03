@@ -1,5 +1,5 @@
-import { apiUrl, hourList } from "./Utils";
-import { TaskMap } from "./Types";
+import { apiUrl, hourList } from './Utils';
+import { TaskMap } from './Types';
 
 const hours = hourList;
 
@@ -24,22 +24,22 @@ export const scheduleData = {
 };
 
 export const getAllSchedules = async (username: string) => {
-  let schedules:TaskMap = {};
+  let schedules: TaskMap = {};
 
-  const res = await fetch(apiUrl + "/userschedules/" + username);
+  const res = await fetch(apiUrl + '/userschedules/' + username);
   const allSchedules = await res.json();
 
   hours.forEach((hour) => {
-    hour = "h" + hour;
+    hour = 'h' + hour;
     schedules[hour] = [];
   });
 
   for (let schedule in allSchedules) {
     allSchedules[schedule].id = allSchedules[schedule].id.toString();
-    let hourName = "h" + allSchedules[schedule].hour;
+    let hourName = 'h' + allSchedules[schedule].hour;
     // console.log(hourName);
     schedules[hourName].push(allSchedules[schedule]);
   }
 
   return schedules;
-}
+};

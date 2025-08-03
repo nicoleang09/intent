@@ -1,6 +1,12 @@
 import '../App.css';
 import '../index.css';
-import { Button, Typography, Grid, createTheme, ThemeProvider } from '@mui/material';
+import {
+  Button,
+  Typography,
+  Grid,
+  createTheme,
+  ThemeProvider,
+} from '@mui/material';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -26,7 +32,13 @@ function ScheduleSlot(props: Props) {
         isCombineEnabled={false}
       >
         {(provided) => (
-          <Grid container spacing={1} direction="row" alignItems="center" minHeight={"3rem"}>
+          <Grid
+            container
+            spacing={1}
+            direction="row"
+            alignItems="center"
+            minHeight={'3rem'}
+          >
             <Grid
               item
               xs="auto"
@@ -40,7 +52,7 @@ function ScheduleSlot(props: Props) {
                 {props.hour.substring(1)}
               </Typography>
             </Grid>
-              
+
             <Grid
               item
               xs
@@ -48,7 +60,11 @@ function ScheduleSlot(props: Props) {
               {...provided.droppableProps}
             >
               {props.dailyTasks.map((item: any, index: number) => (
-                <Draggable key={item.id} draggableId={item.id} index={index}>
+                <Draggable
+                  key={item.id}
+                  draggableId={item.id}
+                  index={index}
+                >
                   {(provided) => (
                     <div
                       ref={provided.innerRef}
@@ -58,15 +74,20 @@ function ScheduleSlot(props: Props) {
                     >
                       <Button
                         onClick={() => props.onToggleCompleted(item.id)}
-                        style={{marginRight: "8px", padding: "0px", color:"#000", minWidth: "0",}}
+                        style={{
+                          marginRight: '8px',
+                          padding: '0px',
+                          color: '#000',
+                          minWidth: '0',
+                        }}
                       >
-                        {item.completed
-                          ? <CheckCircleIcon fontSize="small" />
-                          : <CheckCircleOutlineIcon fontSize="small" />}
+                        {item.isCompleted ? (
+                          <CheckCircleIcon fontSize="small" />
+                        ) : (
+                          <CheckCircleOutlineIcon fontSize="small" />
+                        )}
                       </Button>
-                      <div>
-                        {item.name}
-                      </div>
+                      <div>{item.title}</div>
                     </div>
                   )}
                 </Draggable>

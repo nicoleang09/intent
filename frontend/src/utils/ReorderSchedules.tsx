@@ -1,8 +1,12 @@
-import { DraggableLocation } from "react-beautiful-dnd";
-import { apiUrl } from "./Utils";
-import { Task, TaskMap } from "./Types";
+import { DraggableLocation } from 'react-beautiful-dnd';
+import { apiUrl } from './Utils';
+import { Task, TaskMap } from './Types';
 
-export const reorder = (list: any[], startIdx: number, endIdx: number): any[] => {
+export const reorder = (
+  list: any[],
+  startIdx: number,
+  endIdx: number
+): any[] => {
   const res = Array.from(list);
   console.log(res);
   const [removed] = res.splice(startIdx, 1);
@@ -14,20 +18,24 @@ export const reorder = (list: any[], startIdx: number, endIdx: number): any[] =>
 const updatedScheduleHour = (task: Task, destName: string) => {
   const scheduleId = task.id;
   const data = {
-    "updatedHour": destName.substring(1),
-  }
+    updatedHour: destName.substring(1),
+  };
 
-  fetch(apiUrl + "/schedules/" + scheduleId, {
-    method: "POST",
-    mode: "cors",
+  fetch(apiUrl + '/schedules/' + scheduleId, {
+    method: 'POST',
+    mode: 'cors',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
   });
 };
 
-export const reorderSchedules = (tasks: TaskMap, source: DraggableLocation, dest: DraggableLocation) => {
+export const reorderSchedules = (
+  tasks: TaskMap,
+  source: DraggableLocation,
+  dest: DraggableLocation
+) => {
   const curr = [...tasks[source.droppableId]];
   const next = [...tasks[dest.droppableId]];
   const target = curr[source.index];
@@ -37,7 +45,7 @@ export const reorderSchedules = (tasks: TaskMap, source: DraggableLocation, dest
 
     return {
       ...tasks,
-      [source.droppableId]: reordered
+      [source.droppableId]: reordered,
     };
   }
 
@@ -51,6 +59,6 @@ export const reorderSchedules = (tasks: TaskMap, source: DraggableLocation, dest
   return {
     ...tasks,
     [source.droppableId]: curr,
-    [dest.droppableId]: next
+    [dest.droppableId]: next,
   };
 };

@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": ["**/*.ts", "seeder/seedBooks.js"],
+  "exclude": ["node_modules"],
+  "ts-node": {
+    "esm": true
+  }
+}
