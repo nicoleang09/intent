@@ -36,7 +36,7 @@ app.use(
 
 const originUrl =
   process.env.NODE_ENV === 'production'
-    ? 'https://life-dashboard.netlify.app'
+    ? 'https://intentapp.netlify.app'
     : 'http://localhost:3000';
 
 const corsOptions = {
