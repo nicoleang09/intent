@@ -8,7 +8,6 @@ export const reorder = (
   endIdx: number
 ): any[] => {
   const res = Array.from(list);
-  console.log(res);
   const [removed] = res.splice(startIdx, 1);
   res.splice(endIdx, 0, removed);
 
@@ -18,7 +17,7 @@ export const reorder = (
 const updatedScheduleHour = (task: Task, destName: string) => {
   const scheduleId = task.id;
   const data = {
-    updatedHour: destName.substring(1),
+    updatedHour: destName,
   };
 
   fetch(apiUrl + '/schedules/' + scheduleId, {

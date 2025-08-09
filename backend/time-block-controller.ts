@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Schedule from './models/scheduleModel';
 import User from './models/userModel';
+import { Hours } from './constants/hours';
 
 // Get all schedules
 export const getSchedules = async (_: Request, res: Response) => {
@@ -22,7 +23,11 @@ export const getSchedulesByUser = async (req: Request, res: Response) => {
     const schedules = await Schedule.findAll({
       where: { userId: user.get('id') },
     });
-    res.status(200).json(schedules);
+    const schedulesWithDayString = schedules.map((schedule) => ({
+      ...schedule.dataValues,
+      hour: Hours[schedule.dataValues.hour],
+    }));
+    res.status(200).json(schedulesWithDayString);
   } catch (err) {
     console.log(err);
     res.status(500).send('Error fetching user schedules');
@@ -33,7 +38,11 @@ export const getSchedulesByUser = async (req: Request, res: Response) => {
 export const getSchedulesByHour = async (req: Request, res: Response) => {
   try {
     const hourName = req.params.hour;
-    const schedules = await Schedule.findAll({ where: { hour: hourName } });
+
+    const hourEnum = Hours[hourName.toUpperCase() as keyof typeof Hours];
+    if (hourEnum === undefined) return res.status(400).send('Invalid hour');
+
+    const schedules = await Schedule.findAll({ where: { hour: hourEnum } });
     res.status(200).json(schedules);
   } catch (err) {
     console.log(err);
@@ -48,10 +57,14 @@ export const addSchedule = async (req: Request, res: Response) => {
     const email = req.params.email;
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(404).send('User not found');
+
+    const hourEnum = Hours[hour.toUpperCase() as keyof typeof Hours];
+    if (hourEnum === undefined) return res.status(400).send('Invalid hour');
+
     const schedule = await Schedule.create({
       userId: user.get('id'),
       title,
-      hour,
+      hour: hourEnum,
       isCompleted: false,
     });
     res.status(200).json(schedule.id);
@@ -75,13 +88,30 @@ export const deleteSchedules = async (req: Request, res: Response) => {
   }
 };
 
+// Delete a schedule
+export const deleteSchedule = async (req: Request, res: Response) => {
+  try {
+    await Schedule.destroy({ where: { id: req.params.scheduleId } });
+    res.status(200).send('Deleted');
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Error deleting schedules');
+  }
+};
+
 // Update a schedule
 export const updateSchedule = async (req: Request, res: Response) => {
   try {
     const scheduleId = req.params.scheduleId;
     const { updatedHour, updatedCompleted } = req.body;
     const updateData: any = {};
-    if (updatedHour) updateData.hour = updatedHour;
+
+    if (updatedHour) {
+      const hourEnum = Hours[updatedHour.toUpperCase() as keyof typeof Hours];
+      if (hourEnum === undefined) return res.status(400).send('Invalid hour');
+
+      updateData.hour = hourEnum;
+    }
     if (updatedCompleted !== undefined)
       updateData.isCompleted = updatedCompleted;
     const [updatedRows, [updatedSchedule]] = await Schedule.update(updateData, {

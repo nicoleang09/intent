@@ -3,13 +3,13 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { lightTheme } from '../Theme';
 import { format, sub } from 'date-fns';
 import { useState } from 'react';
-import { Box, Button, Typography } from '@mui/material';
 import {
-  NumTextField,
   DateTimeField,
   WidgetBox,
   PillButton,
+  TimeField,
 } from './ReusableComponents';
+import { Button, Grid, Title, Typography } from '@mantine/core';
 
 function TimeCalculator() {
   const [arrTime, setArrTime] = useState<Date | null>(null);
@@ -30,22 +30,27 @@ function TimeCalculator() {
   let wakeTime: Date | null = null;
 
   const calc = () => {
+    setIsDisp(false);
+
     let travelDurSplit = travelDur.split(':');
     let prepDurSplit = prepDur.split(':');
     let sleepDurSplit = sleepDur.split(':');
 
     if (isEnterDur) {
-      if (!arrTime || !travelDur || travelDurSplit.length < 2) return;
-
-      console.log('Calculating with duration...');
+      // console.log(
+      //   'Calculating departure time based on arrival time and travel duration',
+      //   travelDur
+      // );
+      if (!arrTime || !travelDur || travelDurSplit.length < 2) {
+        console.error('Invalid input for travel duration or arrival time');
+        return;
+      }
       depTimeCalc = sub(arrTime, {
         hours: parseInt(travelDurSplit[0]),
         minutes: parseInt(travelDurSplit[1]),
       });
     } else {
       if (!depTime) return;
-
-      console.log('Calculating with time...');
       depTimeCalc = depTime;
     }
 
@@ -79,14 +84,14 @@ function TimeCalculator() {
       wakeTimeStr: wakeTimeStr,
     });
 
-    console.log(
-      'depTime',
-      depTimeStr,
-      'sleepTime',
-      sleepTimeStr,
-      'wakeTime',
-      wakeTimeStr
-    );
+    // console.log(
+    //   'depTime',
+    //   depTimeStr,
+    //   'sleepTime',
+    //   sleepTimeStr,
+    //   'wakeTime',
+    //   wakeTimeStr
+    // );
   };
 
   let theme = createTheme(lightTheme);
@@ -94,85 +99,90 @@ function TimeCalculator() {
   return (
     <ThemeProvider theme={theme}>
       <WidgetBox>
-        <Typography
-          variant="h3"
-          marginBottom={'0.5rem'}
-          color="primaryText"
+        <Title
+          order={3}
+          style={{ marginBottom: '0.5rem' }}
         >
-          Time Calculator
-        </Typography>
+          Prep Time Planner
+        </Title>
 
-        <Box>
-          <DateTimeField
-            label="Arrive by"
-            onChangeFn={(t) => (t == null ? null : setArrTime(t))}
-            value={arrTime}
-            style={{ margin: '4px 0px' }}
-          />
-
-          {isEnterDur ? (
-            <NumTextField
-              id="travelDur"
-              label="Travel duration [HH:mm]"
-              onChange={(d) => setTravelDur(d.currentTarget.value)}
-              style={{ margin: '4px 0px' }}
-            />
-          ) : (
-            <DateTimeField
-              label="Depart by"
-              onChangeFn={(t) => (t == null ? null : setDepTime(t))}
-              value={depTime}
-              style={{ margin: '4px 0px' }}
-            />
+        <Grid>
+          {isEnterDur && (
+            <Grid.Col span={12}>
+              <DateTimeField
+                label="Arrive at destination by"
+                onChange={(t) => (t == null ? null : setArrTime(new Date(t)))}
+                value={arrTime}
+                required
+                // style={{ margin: '4px 0px' }}
+              />
+            </Grid.Col>
           )}
 
-          <Button
-            aria-label="switchInputType"
-            onClick={() => setIsEnterDur(!isEnterDur)}
-            sx={{ fontSize: '0.8rem' }}
-          >
-            {isEnterDur
-              ? 'Enter departure time instead'
-              : 'Enter commute duration instead'}
-          </Button>
+          <Grid.Col span={12}>
+            {isEnterDur ? (
+              <TimeField
+                id="travelDur"
+                label="Travel duration [HH:mm]"
+                onChange={(d) => setTravelDur(d)}
+                style={{ margin: '4px 0px' }}
+                required
+              />
+            ) : (
+              <DateTimeField
+                label="Depart by"
+                onChange={(t) => (t == null ? null : setDepTime(new Date(t)))}
+                value={depTime}
+                style={{ margin: '4px 0px' }}
+                required
+              />
+            )}
 
-          <NumTextField
-            id="prepDur"
-            label="Preparation duration [HH:mm]"
-            onChange={(d) => setPrepDur(d.currentTarget.value)}
-            style={{ margin: '4px 0px' }}
-          />
+            <Button
+              aria-label="switchInputType"
+              onClick={() => setIsEnterDur(!isEnterDur)}
+              style={{ fontSize: '0.8rem' }}
+              variant="subtle"
+            >
+              {isEnterDur
+                ? 'Enter departure time instead'
+                : 'Enter commute duration instead'}
+            </Button>
+          </Grid.Col>
 
-          <NumTextField
-            id="sleepDur"
-            label="Sleep duration [HH:mm]"
-            onChange={(d) => setSleepDur(d.currentTarget.value)}
-            style={{ margin: '4px 0px' }}
-          />
+          <Grid.Col span={12}>
+            <TimeField
+              id="prepDur"
+              label="Preparation duration [HH:mm]"
+              onChange={(d) => setPrepDur(d)}
+              style={{ margin: '4px 0px' }}
+            />
+          </Grid.Col>
+
+          <Grid.Col span={12}>
+            <TimeField
+              id="sleepDur"
+              label="Sleep duration [HH:mm]"
+              onChange={(d) => setSleepDur(d)}
+              style={{ margin: '4px 0px' }}
+            />
+          </Grid.Col>
 
           <PillButton
             onClick={() => calc()}
-            style={{ margin: '1rem 0px' }}
+            style={{ margin: '1rem 0px', width: '100%' }}
           >
             Calculate
           </PillButton>
-        </Box>
 
-        {isDisp ? (
-          <Box>
-            <Typography color="primaryText">
-              💤 Sleep by: {disp.sleepTimeStr}
-            </Typography>
-            <Typography color="primaryText">
-              ⏰ Wake by: {disp.wakeTimeStr}
-            </Typography>
-            <Typography color="primaryText">
-              🚌 Depart by: {disp.depTimeStr}
-            </Typography>
-          </Box>
-        ) : (
-          <Box></Box>
-        )}
+          {isDisp && (
+            <Grid.Col span={12}>
+              <Typography>💤 Sleep by: {disp.sleepTimeStr}</Typography>
+              <Typography>⏰ Wake by: {disp.wakeTimeStr}</Typography>
+              <Typography>🚌 Depart by: {disp.depTimeStr}</Typography>
+            </Grid.Col>
+          )}
+        </Grid>
       </WidgetBox>
     </ThemeProvider>
   );

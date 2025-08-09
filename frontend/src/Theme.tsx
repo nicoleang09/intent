@@ -1,3 +1,4 @@
+import { MantineThemeOverride } from '@mantine/core';
 import { TypographyOptions } from '@mui/material/styles/createTypography';
 
 declare module '@mui/material/Typography' {

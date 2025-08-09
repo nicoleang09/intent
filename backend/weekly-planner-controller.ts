@@ -81,6 +81,16 @@ export const deleteTasks = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteTask = async (req: Request, res: Response) => {
+  try {
+    await Task.destroy({ where: { id: req.params.taskId } });
+    res.status(200).send('Deleted');
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Error deleting tasks');
+  }
+};
+
 export const updateTask = async (req: Request, res: Response) => {
   try {
     const taskId = req.params.taskId;

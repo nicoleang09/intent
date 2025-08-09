@@ -8,6 +8,7 @@ import {
   deleteTasks,
   getTasksByUser,
   updateTask,
+  deleteTask,
 } from './weekly-planner-controller';
 import {
   getSchedules,
@@ -16,6 +17,7 @@ import {
   deleteSchedules,
   getSchedulesByUser,
   updateSchedule,
+  deleteSchedule,
 } from './time-block-controller';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -79,6 +81,7 @@ app.get('/usertasks/:email', getTasksByUser);
 app.post('/usertasks/:email', addTask);
 app.get('/tasks', getTasks);
 app.delete('/tasks', deleteTasks);
+app.delete('/tasks/:taskId', deleteTask);
 app.post('/tasks/:taskId', updateTask);
 app.get('/tasks/:day', getTasksByDay);
 
@@ -87,6 +90,7 @@ app.get('/userschedules/:email', getSchedulesByUser);
 app.post('/userschedules/:email', addSchedule);
 app.get('/schedules', getSchedules);
 app.delete('/schedules', deleteSchedules);
+app.delete('/schedules/:scheduleId', deleteSchedule);
 app.post('/schedules/:scheduleId', updateSchedule);
 app.get('/schedules/:hour', getSchedulesByHour);
 

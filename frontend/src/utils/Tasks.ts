@@ -39,3 +39,37 @@ const toTitleCase = (str: string) => {
       text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
   );
 };
+
+export const addTask = async (name: string, day: string, username?: string) => {
+  const data = { title: name, day: day };
+  await fetch(apiUrl + '/usertasks/' + username, {
+    method: 'POST',
+    mode: 'cors',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+};
+
+export const updateTaskCompleted = (taskId: number, completed: boolean) => {
+  const data = {
+    updatedCompleted: completed,
+  };
+
+  fetch(apiUrl + '/tasks/' + taskId, {
+    method: 'POST',
+    mode: 'cors',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+};
+
+export const deleteTask = (taskId: number) => {
+  fetch(apiUrl + '/tasks/' + taskId, {
+    method: 'DELETE',
+    mode: 'cors',
+  });
+};
