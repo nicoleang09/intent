@@ -18,7 +18,6 @@ export const AddTaskDialog = (props: AddTaskDialogProps) => {
   const validateRequiredField = (value: string) =>
     value.length > 0 ? null : 'This field is required';
   const form = useForm({
-    mode: 'uncontrolled',
     initialValues: {
       taskName: '',
       slot: '',
@@ -43,6 +42,7 @@ export const AddTaskDialog = (props: AddTaskDialogProps) => {
           const validation = form.validate();
           if (validation.hasErrors) return;
           props.handleAddTask(form.values.taskName, form.values.slot);
+          form.reset();
         }}
       >
         <Grid>
