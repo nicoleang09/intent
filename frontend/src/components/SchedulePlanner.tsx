@@ -4,7 +4,10 @@ import { WidgetBox } from './ReusableComponents';
 import HourlyAgenda from './HourlyAgenda';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Task, TaskMap } from '../utils/Types';
-import { reorderSchedules } from '../utils/ReorderSchedules';
+import {
+  reorderSchedules,
+  reorderSessionSchedules,
+} from '../utils/ReorderSchedules';
 import {
   addSchedule,
   deleteSchedule,
@@ -17,9 +20,14 @@ import AddIcon from '@mui/icons-material/Add';
 import { Button, Grid, Title } from '@mantine/core';
 import { AddTaskDialog } from './AddTaskDialog';
 import { notifications } from '@mantine/notifications';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  getStorageSchedules,
+  setStorageSchedules,
+} from '../utils/local-storage';
 
 interface TimeBlockProps {
-  cookie?: string;
+  token?: string;
 }
 
 function SchedulePlanner(props: TimeBlockProps) {
@@ -27,17 +35,28 @@ function SchedulePlanner(props: TimeBlockProps) {
   const [schedules, setSchedules] = useState<TaskMap>(scheduleData);
 
   useEffect(() => {
-    if (!props.cookie) return;
+    if (!props.token) {
+      setSchedules(getStorageSchedules());
+      return;
+    }
 
-    getAllSchedules(props.cookie).then((allTasks) => setSchedules(allTasks));
-  }, [props.cookie]);
+    getAllSchedules(props.token).then((allTasks) => {
+      setStorageSchedules(allTasks);
+      setSchedules(allTasks);
+    });
+  }, [props.token]);
 
   const handleOnDragEnd = (res: any) => {
     const { source, destination } = res;
 
     if (!destination) return;
 
-    setSchedules(reorderSchedules(schedules, source, destination));
+    const reorderedSchedules = props.token
+      ? reorderSchedules(schedules, source, destination)
+      : reorderSessionSchedules(schedules, source, destination);
+
+    setStorageSchedules(reorderedSchedules);
+    setSchedules(reorderedSchedules);
   };
 
   const toggleCompleted = (item: Task, hour: string) => {
@@ -50,8 +69,14 @@ function SchedulePlanner(props: TimeBlockProps) {
       }),
     };
 
-    updateScheduleCompleted(item.id, !item.isCompleted);
+    setStorageSchedules(updatedSchedules);
     setSchedules(updatedSchedules);
+
+    if (!props.token) {
+      return;
+    }
+
+    updateScheduleCompleted(Number(item.id), !item.isCompleted);
   };
 
   const onDelete = (item: Task, hour: string) => {
@@ -61,8 +86,14 @@ function SchedulePlanner(props: TimeBlockProps) {
       [hour]: hourlyTaskList.filter((task) => task.id !== item.id),
     };
 
-    deleteSchedule(item.id);
+    setStorageSchedules(updatedSchedules);
     setSchedules(updatedSchedules);
+
+    if (!props.token) {
+      return;
+    }
+
+    deleteSchedule(Number(item.id));
   };
 
   const handleAddSchedule = async (name: string, hour: string) => {
@@ -77,11 +108,23 @@ function SchedulePlanner(props: TimeBlockProps) {
       return;
     }
 
-    if (!props.cookie) return;
+    if (!props.token) {
+      const updatedSchedules = {
+        ...schedules,
+        ['h' + hour]: [{ id: uuidv4(), title: name, isCompleted: false }],
+      };
+      setStorageSchedules(updatedSchedules);
+      setSchedules(updatedSchedules);
+      setDialogOpen(false);
+      return;
+    }
 
-    addSchedule(name, hour, props.cookie).then(() => {
-      if (!props.cookie) return;
-      getAllSchedules(props.cookie).then((allTasks) => setSchedules(allTasks));
+    addSchedule(name, hour).then(() => {
+      if (!props.token) return;
+      getAllSchedules(props.token).then((allTasks) => {
+        setStorageSchedules(allTasks);
+        setSchedules(allTasks);
+      });
       setDialogOpen(false);
     });
   };

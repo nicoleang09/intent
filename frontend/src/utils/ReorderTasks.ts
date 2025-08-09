@@ -59,3 +59,31 @@ export const reorderTasks = (
     [dest.droppableId]: next,
   };
 };
+
+export const reorderSessionTasks = (
+  tasks: TaskMap,
+  source: DraggableLocation,
+  dest: DraggableLocation
+) => {
+  const curr = [...tasks[source.droppableId]];
+  const next = [...tasks[dest.droppableId]];
+  const target = curr[source.index];
+
+  if (source.droppableId === dest.droppableId) {
+    const reordered = reorder(curr, source.index, dest.index);
+
+    return {
+      ...tasks,
+      [source.droppableId]: reordered,
+    };
+  }
+
+  curr.splice(source.index, 1);
+  next.splice(dest.index, 0, target);
+
+  return {
+    ...tasks,
+    [source.droppableId]: curr,
+    [dest.droppableId]: next,
+  };
+};

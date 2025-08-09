@@ -4,7 +4,7 @@ import { WidgetBox } from './ReusableComponents';
 import DailyAgenda from './DailyAgenda';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Task, TaskMap } from '../utils/Types';
-import { reorderTasks } from '../utils/ReorderTasks';
+import { reorderSessionTasks, reorderTasks } from '../utils/ReorderTasks';
 import {
   addTask,
   deleteTask,
@@ -16,9 +16,11 @@ import { dayList } from '../utils/Utils';
 import AddIcon from '@mui/icons-material/Add';
 import { Button, Grid, Title } from '@mantine/core';
 import { AddTaskDialog } from './AddTaskDialog';
+import { v4 as uuidv4 } from 'uuid';
+import { getStorageTasks, setStorageTasks } from '../utils/local-storage';
 
 interface WeeklyPlannerProps {
-  cookie?: string;
+  token?: string;
 }
 
 function WeeklyPlanner(props: WeeklyPlannerProps) {
@@ -26,17 +28,25 @@ function WeeklyPlanner(props: WeeklyPlannerProps) {
   const [tasks, setTasks] = useState<TaskMap>(taskData);
 
   useEffect(() => {
-    if (!props.cookie) return;
+    if (!props.token) {
+      setTasks(getStorageTasks());
+      return;
+    }
 
-    getAllTasks(props.cookie).then((allTasks) => setTasks(allTasks));
-  }, [props.cookie]);
+    getAllTasks(props.token).then((allTasks) => setTasks(allTasks));
+  }, [props.token]);
 
   const handleOnDragEnd = (res: any) => {
     const { source, destination } = res;
 
     if (!destination) return;
 
-    setTasks(reorderTasks(tasks, source, destination));
+    const reorderedTasks = props.token
+      ? reorderTasks(tasks, source, destination)
+      : reorderSessionTasks(tasks, source, destination);
+
+    setStorageTasks(reorderedTasks);
+    setTasks(reorderedTasks);
   };
 
   const toggleCompleted = (item: Task, day: string) => {
@@ -49,8 +59,12 @@ function WeeklyPlanner(props: WeeklyPlannerProps) {
       }),
     };
 
-    updateTaskCompleted(item.id, !item.isCompleted);
+    setStorageTasks(updatedTasks);
     setTasks(updatedTasks);
+
+    if (!props.token) return;
+
+    updateTaskCompleted(Number(item.id), !item.isCompleted);
   };
 
   const onDelete = (item: Task, day: string) => {
@@ -60,16 +74,35 @@ function WeeklyPlanner(props: WeeklyPlannerProps) {
       [day]: dailyTaskList.filter((task) => task.id !== item.id),
     };
 
-    deleteTask(item.id);
+    setStorageTasks(updatedTasks);
     setTasks(updatedTasks);
+
+    if (!props.token) return;
+
+    deleteTask(Number(item.id));
   };
 
   const handleAddTask = async (name: string, day: string) => {
-    if (!props.cookie) return;
+    if (!props.token) {
+      const updatedTasks = {
+        ...tasks,
+        [day]: [
+          ...tasks[day],
+          { id: uuidv4(), title: name, isCompleted: false },
+        ],
+      };
+      setStorageTasks(updatedTasks);
+      setTasks(updatedTasks);
+      setDialogOpen(false);
+      return;
+    }
 
-    addTask(name, day, props.cookie).then(() => {
-      if (!props.cookie) return;
-      getAllTasks(props.cookie).then((allTasks) => setTasks(allTasks));
+    addTask(name, day, props.token).then(() => {
+      if (!props.token) return;
+      getAllTasks(props.token).then((allTasks) => {
+        setStorageTasks(allTasks);
+        setTasks(allTasks);
+      });
       setDialogOpen(false);
     });
   };

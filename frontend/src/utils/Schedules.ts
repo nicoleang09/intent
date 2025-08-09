@@ -1,5 +1,6 @@
 import { apiUrl, hourList } from './Utils';
 import { TaskMap } from './Types';
+import { getSessionUsername } from './session-storage';
 
 const hours = hourList;
 
@@ -43,14 +44,10 @@ export const getAllSchedules = async (username: string) => {
   return schedules;
 };
 
-export const addSchedule = async (
-  name: string,
-  hour: string,
-  username: string
-) => {
+export const addSchedule = async (name: string, hour: string) => {
   const data = { title: name, hour: hour };
 
-  await fetch(apiUrl + '/userschedules/' + username, {
+  await fetch(apiUrl + '/userschedules/' + getSessionUsername(), {
     method: 'POST',
     mode: 'cors',
     headers: {
