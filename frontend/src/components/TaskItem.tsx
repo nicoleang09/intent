@@ -2,12 +2,14 @@ import { ActionIcon, Flex, Typography } from '@mantine/core';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { Task } from '../utils/Types';
 
 interface TaskItemProps {
   item: Task;
   onToggleCompleted: (item: Task) => void;
   onDelete: (item: Task) => void;
+  onEdit: (item: Task) => void;
   innerRef?: (element: HTMLElement | null) => any;
   draggableProps?: any;
   dragHandleProps?: any;
@@ -17,6 +19,7 @@ const TaskItem = ({
   item,
   onToggleCompleted,
   onDelete,
+  onEdit,
   innerRef,
   draggableProps,
   dragHandleProps,
@@ -48,6 +51,13 @@ const TaskItem = ({
     >
       {item.title}
     </Typography>
+    <ActionIcon
+      onClick={() => onEdit(item)}
+      variant="transparent"
+      style={{ justifySelf: 'flex-end' }}
+    >
+      <EditIcon fontSize="small" />
+    </ActionIcon>
     <ActionIcon
       onClick={() => onDelete(item)}
       variant="transparent"

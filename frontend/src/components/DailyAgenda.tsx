@@ -1,9 +1,10 @@
 import '../App.css';
 import '../index.css';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
-import { Divider, Grid, Typography } from '@mantine/core';
+import { Button, Divider, Grid, Typography } from '@mantine/core';
 import TaskItem from './TaskItem';
 import { Task } from '../utils/Types';
+import { AddTaskInfo } from './AddTaskDialog';
 
 interface Props {
   dailyTasks: Object[];
@@ -13,6 +14,7 @@ interface Props {
   isCombineEnabled?: boolean;
   onToggleCompleted: (item: Task, day: string) => void;
   onDelete: (item: Task, day: string) => void;
+  onEditTask: (taskInfo: AddTaskInfo) => void;
 }
 
 function DailyAgenda(props: Props) {
@@ -57,11 +59,25 @@ function DailyAgenda(props: Props) {
                   innerRef={provided.innerRef}
                   draggableProps={provided.draggableProps}
                   dragHandleProps={provided.dragHandleProps}
+                  onEdit={(item) => {
+                    props.onEditTask({
+                      id: item.id,
+                      taskName: item.title,
+                      slot: props.day,
+                    });
+                  }}
                 />
               )}
             </Draggable>
           ))}
           {provided.placeholder}
+          <Button
+            fullWidth
+            variant="subtle"
+            onClick={() => props.onEditTask({ slot: props.day })}
+          >
+            + Add Task
+          </Button>
         </Grid.Col>
       )}
     </Droppable>

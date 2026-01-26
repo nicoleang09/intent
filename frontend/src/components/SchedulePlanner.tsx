@@ -171,7 +171,7 @@ function SchedulePlanner(props: TimeBlockProps) {
         slotLabel="Hour"
         isDialogOpen={isDialogOpen}
         setDialogOpen={setDialogOpen}
-        handleAddTask={handleAddSchedule}
+        onClose={handleAddSchedule}
         slotList={hourList}
       />
     </>

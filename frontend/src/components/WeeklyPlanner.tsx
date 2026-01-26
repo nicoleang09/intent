@@ -15,7 +15,7 @@ import {
 import { dayList } from '../utils/Utils';
 import AddIcon from '@mui/icons-material/Add';
 import { Button, Grid, Title } from '@mantine/core';
-import { AddTaskDialog } from './AddTaskDialog';
+import { AddTaskDialog, AddTaskInfo } from './AddTaskDialog';
 import { v4 as uuidv4 } from 'uuid';
 import { getStorageTasks, setStorageTasks } from '../utils/local-storage';
 
@@ -26,6 +26,10 @@ interface WeeklyPlannerProps {
 function WeeklyPlanner(props: WeeklyPlannerProps) {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [tasks, setTasks] = useState<TaskMap>(taskData);
+  const [existingValue, setExistingValue] = useState<AddTaskInfo>({
+    taskName: '',
+    slot: dayList[0],
+  });
 
   useEffect(() => {
     if (!props.token) {
@@ -82,13 +86,15 @@ function WeeklyPlanner(props: WeeklyPlannerProps) {
     deleteTask(Number(item.id));
   };
 
-  const handleAddTask = async (name: string, day: string) => {
+  const handleAddTask = async ({ taskName, slot }: AddTaskInfo) => {
+    if (!taskName || !slot) return;
+
     if (!props.token) {
       const updatedTasks = {
         ...tasks,
-        [day]: [
-          ...tasks[day],
-          { id: uuidv4(), title: name, isCompleted: false },
+        [slot]: [
+          ...tasks[slot],
+          { id: uuidv4(), title: taskName, isCompleted: false },
         ],
       };
       setStorageTasks(updatedTasks);
@@ -97,7 +103,7 @@ function WeeklyPlanner(props: WeeklyPlannerProps) {
       return;
     }
 
-    addTask(name, day, props.token).then(() => {
+    addTask(taskName, slot, props.token).then(() => {
       if (!props.token) return;
       getAllTasks(props.token).then((allTasks) => {
         setStorageTasks(allTasks);
@@ -105,6 +111,51 @@ function WeeklyPlanner(props: WeeklyPlannerProps) {
       });
       setDialogOpen(false);
     });
+  };
+
+  const handleUpdateTask = async ({ taskName, slot, id }: AddTaskInfo) => {
+    if (!taskName || !slot || !id) return;
+
+    const currentDay = Object.keys(tasks).find((d) =>
+      tasks[d].some((t) => t.id === id)
+    );
+
+    if (!currentDay) return;
+
+    const existingTask = tasks[currentDay].find((t) => t.id === id);
+
+    if (!props.token) {
+      const updatedTasks = { ...tasks };
+      updatedTasks[currentDay] = updatedTasks[currentDay].filter(
+        (t) => t.id !== id
+      );
+      updatedTasks[slot] = [
+        ...updatedTasks[slot],
+        {
+          id: id,
+          title: taskName,
+          isCompleted: existingTask?.isCompleted || false,
+        },
+      ];
+      setStorageTasks(updatedTasks);
+      setTasks(updatedTasks);
+      setDialogOpen(false);
+      return;
+    }
+
+    // TODO: implement updateTask in backend and frontend utils
+    // updateTask(Number(taskId), name, day, props.token).then(() => {
+    //   getAllTasks(props.token!).then((allTasks) => {
+    //     setStorageTasks(allTasks);
+    //     setTasks(allTasks);
+    //   });
+    //   setDialogOpen(false);
+    // });
+  };
+
+  const openAddTaskDialog = (taskInfo?: AddTaskInfo) => {
+    setDialogOpen(true);
+    setExistingValue(taskInfo || { taskName: '', slot: dayList[0] });
   };
 
   return (
@@ -120,7 +171,7 @@ function WeeklyPlanner(props: WeeklyPlannerProps) {
           <Button
             variant="light"
             radius="xl"
-            onClick={() => setDialogOpen(true)}
+            onClick={() => openAddTaskDialog()}
           >
             <AddIcon fontSize="small" /> Add
           </Button>
@@ -136,6 +187,7 @@ function WeeklyPlanner(props: WeeklyPlannerProps) {
                 dailyTasks={val}
                 onToggleCompleted={toggleCompleted}
                 onDelete={onDelete}
+                onEditTask={(taskInfo) => openAddTaskDialog(taskInfo)}
               />
             ))}
           </DragDropContext>
@@ -146,8 +198,11 @@ function WeeklyPlanner(props: WeeklyPlannerProps) {
         slotLabel="Day"
         isDialogOpen={isDialogOpen}
         setDialogOpen={setDialogOpen}
-        handleAddTask={handleAddTask}
+        onClose={(taskInfo) =>
+          taskInfo.id ? handleUpdateTask(taskInfo) : handleAddTask(taskInfo)
+        }
         slotList={dayList}
+        existingValue={existingValue}
       />
     </>
   );

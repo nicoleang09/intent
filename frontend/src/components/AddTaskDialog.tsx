@@ -1,12 +1,20 @@
 import { Button, Grid, Modal, Select, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useEffect } from 'react';
+
+export interface AddTaskInfo {
+  id?: string;
+  taskName?: string;
+  slot: string;
+}
 
 export interface AddTaskDialogProps {
   slotLabel: string;
   isDialogOpen: boolean;
   setDialogOpen: (open: boolean) => void;
-  handleAddTask: (taskName: string, taskSlot: string) => void;
+  onClose: (taskInfo: AddTaskInfo) => void;
   slotList: string[];
+  existingValue?: AddTaskInfo;
 }
 
 export const AddTaskDialog = (props: AddTaskDialogProps) => {
@@ -29,10 +37,19 @@ export const AddTaskDialog = (props: AddTaskDialogProps) => {
     },
   });
 
+  useEffect(() => {
+    if (props.existingValue) {
+      form.setValues({
+        taskName: props.existingValue.taskName,
+        slot: props.existingValue.slot,
+      });
+    }
+  }, [props.existingValue]);
+
   return (
     <Modal
       opened={props.isDialogOpen}
-      title={'Add New Task'}
+      title={props.existingValue?.id ? 'Edit Task' : 'Add New Task'}
       onClose={handleClose}
       centered
     >
@@ -41,7 +58,11 @@ export const AddTaskDialog = (props: AddTaskDialogProps) => {
           event.preventDefault();
           const validation = form.validate();
           if (validation.hasErrors) return;
-          props.handleAddTask(form.values.taskName, form.values.slot);
+          props.onClose({
+            taskName: form.values.taskName,
+            slot: form.values.slot,
+            id: props.existingValue?.id,
+          });
           form.reset();
         }}
       >
@@ -86,7 +107,7 @@ export const AddTaskDialog = (props: AddTaskDialogProps) => {
                   key="add"
                   type="submit"
                 >
-                  Add
+                  {props.existingValue?.id ? 'Update' : 'Add'}
                 </Button>
               </Grid.Col>
             </Grid>
