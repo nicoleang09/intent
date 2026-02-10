@@ -4,6 +4,7 @@ import { Draggable, Droppable } from 'react-beautiful-dnd';
 import TaskItem from './TaskItem';
 import { Divider, Grid, Typography } from '@mantine/core';
 import { Task } from '../utils/Types';
+import { AddTaskInfo } from './AddTaskDialog';
 
 interface Props {
   dailyTasks: Task[];
@@ -13,6 +14,7 @@ interface Props {
   isCombineEnabled?: boolean;
   onToggleCompleted: (item: Task, hour: string) => void;
   onDelete: (item: Task, hour: string) => void;
+  onEdit: (taskInfo: AddTaskInfo) => void;
 }
 
 function HourlyAgenda(props: Props) {
@@ -70,10 +72,17 @@ function HourlyAgenda(props: Props) {
                         innerRef={provided.innerRef}
                         draggableProps={provided.draggableProps}
                         dragHandleProps={provided.dragHandleProps}
+                        onEdit={(item) => {
+                          props.onEdit({
+                            id: item.id,
+                            taskName: item.title,
+                            slot: props.hour,
+                          });
+                        }}
                       />
                     )}
                   </Draggable>
-                )
+                ),
             )}
             {provided.placeholder}
           </Grid.Col>

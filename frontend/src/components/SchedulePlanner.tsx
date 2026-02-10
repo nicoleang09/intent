@@ -18,7 +18,7 @@ import {
 import { hourList } from '../utils/Utils';
 import AddIcon from '@mui/icons-material/Add';
 import { Button, Grid, Title } from '@mantine/core';
-import { AddTaskDialog } from './AddTaskDialog';
+import { AddTaskDialog, AddTaskInfo } from './AddTaskDialog';
 import { notifications } from '@mantine/notifications';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -33,6 +33,10 @@ interface TimeBlockProps {
 function SchedulePlanner(props: TimeBlockProps) {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [schedules, setSchedules] = useState<TaskMap>(scheduleData);
+  const [existingValue, setExistingValue] = useState<AddTaskInfo>({
+    taskName: '',
+    slot: hourList[0],
+  });
 
   useEffect(() => {
     if (!props.token) {
@@ -96,22 +100,25 @@ function SchedulePlanner(props: TimeBlockProps) {
     deleteSchedule(Number(item.id));
   };
 
-  const handleAddSchedule = async (name: string, hour: string) => {
+  const handleAddSchedule = async ({ taskName, slot }: AddTaskInfo) => {
+    if (!taskName || !slot) return;
+
     // There is already a schedule at that time slot
-    if (schedules['h' + hour]?.length !== 0) {
+    if (schedules['h' + slot]?.length !== 0) {
       notifications.show({
         color: 'red',
         title: 'Error',
         message:
           'There is already a schedule at this time slot. Please pick another time slot.',
       });
+      setDialogOpen(false);
       return;
     }
 
     if (!props.token) {
       const updatedSchedules = {
         ...schedules,
-        ['h' + hour]: [{ id: uuidv4(), title: name, isCompleted: false }],
+        ['h' + slot]: [{ id: uuidv4(), title: taskName, isCompleted: false }],
       };
       setStorageSchedules(updatedSchedules);
       setSchedules(updatedSchedules);
@@ -119,13 +126,73 @@ function SchedulePlanner(props: TimeBlockProps) {
       return;
     }
 
-    addSchedule(name, hour).then(() => {
+    addSchedule(taskName, slot).then(() => {
       if (!props.token) return;
       getAllSchedules(props.token).then((allTasks) => {
         setStorageSchedules(allTasks);
         setSchedules(allTasks);
       });
       setDialogOpen(false);
+    });
+  };
+
+  const handleUpdateSchedule = async ({ taskName, slot, id }: AddTaskInfo) => {
+    if (!taskName || !slot || !id) return;
+
+    const currentHour = Object.keys(schedules).find((d) =>
+      schedules[d].some((t) => t.id === id),
+    );
+
+    if (!currentHour) return;
+
+    const existingTask = schedules[currentHour].find((t) => t.id === id);
+
+    // Check if there's already a schedule at the new time slot (only if moving to a different slot)
+    if (currentHour !== 'h' + slot && schedules['h' + slot]?.length !== 0) {
+      notifications.show({
+        color: 'red',
+        title: 'Error',
+        message:
+          'There is already a schedule at this time slot. Please pick another time slot.',
+      });
+      setDialogOpen(false);
+      return;
+    }
+
+    if (!props.token) {
+      const updatedSchedules = { ...schedules };
+      updatedSchedules[currentHour] = updatedSchedules[currentHour].filter(
+        (t) => t.id !== id,
+      );
+      updatedSchedules['h' + slot] = [
+        ...updatedSchedules['h' + slot],
+        {
+          id: id,
+          title: taskName,
+          isCompleted: existingTask?.isCompleted || false,
+        },
+      ];
+      setStorageSchedules(updatedSchedules);
+      setSchedules(updatedSchedules);
+      setDialogOpen(false);
+      return;
+    }
+
+    // TODO: implement updateSchedule in backend and frontend utils
+    // updateSchedule(Number(id), taskName, slot, props.token).then(() => {
+    //   getAllSchedules(props.token!).then((allTasks) => {
+    //     setStorageSchedules(allTasks);
+    //     setSchedules(allTasks);
+    //   });
+    //   setDialogOpen(false);
+    // });
+  };
+
+  const openAddTaskDialog = (taskInfo?: AddTaskInfo) => {
+    setDialogOpen(true);
+    setExistingValue({
+      ...taskInfo,
+      slot: taskInfo?.slot.substring(1) || hourList[0],
     });
   };
 
@@ -145,7 +212,7 @@ function SchedulePlanner(props: TimeBlockProps) {
           <Button
             variant="light"
             radius="xl"
-            onClick={() => setDialogOpen(true)}
+            onClick={() => openAddTaskDialog()}
           >
             <AddIcon fontSize="small" /> Add
           </Button>
@@ -161,6 +228,7 @@ function SchedulePlanner(props: TimeBlockProps) {
                 dailyTasks={val}
                 onToggleCompleted={toggleCompleted}
                 onDelete={onDelete}
+                onEdit={(taskInfo) => openAddTaskDialog(taskInfo)}
               />
             ))}
           </DragDropContext>
@@ -171,8 +239,13 @@ function SchedulePlanner(props: TimeBlockProps) {
         slotLabel="Hour"
         isDialogOpen={isDialogOpen}
         setDialogOpen={setDialogOpen}
-        onClose={handleAddSchedule}
+        onClose={(taskInfo) =>
+          taskInfo.id
+            ? handleUpdateSchedule(taskInfo)
+            : handleAddSchedule(taskInfo)
+        }
         slotList={hourList}
+        existingValue={existingValue}
       />
     </>
   );
