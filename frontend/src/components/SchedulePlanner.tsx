@@ -230,7 +230,7 @@ function SchedulePlanner(props: TimeBlockProps) {
                   dailyTasks={schedules[key] ?? []}
                   onToggleCompleted={toggleCompleted}
                   onDelete={onDelete}
-                  onEdit={(taskInfo) => openAddTaskDialog(taskInfo)}
+                  onEdit={openAddTaskDialog}
                 />
               );
             })}

@@ -117,7 +117,7 @@ function WeeklyPlanner(props: WeeklyPlannerProps) {
     if (!taskName || !slot || !id) return;
 
     const currentDay = Object.keys(tasks).find((d) =>
-      tasks[d].some((t) => t.id === id)
+      tasks[d].some((t) => t.id === id),
     );
 
     if (!currentDay) return;
@@ -127,7 +127,7 @@ function WeeklyPlanner(props: WeeklyPlannerProps) {
     if (!props.token) {
       const updatedTasks = { ...tasks };
       updatedTasks[currentDay] = updatedTasks[currentDay].filter(
-        (t) => t.id !== id
+        (t) => t.id !== id,
       );
       updatedTasks[slot] = [
         ...updatedTasks[slot],
@@ -187,7 +187,8 @@ function WeeklyPlanner(props: WeeklyPlannerProps) {
                 dailyTasks={val}
                 onToggleCompleted={toggleCompleted}
                 onDelete={onDelete}
-                onEditTask={(taskInfo) => openAddTaskDialog(taskInfo)}
+                onEditTask={openAddTaskDialog}
+                onCloneTask={handleAddTask}
               />
             ))}
           </DragDropContext>

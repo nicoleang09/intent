@@ -15,6 +15,7 @@ interface Props {
   onToggleCompleted: (item: Task, day: string) => void;
   onDelete: (item: Task, day: string) => void;
   onEditTask: (taskInfo: AddTaskInfo) => void;
+  onCloneTask: (taskInfo: AddTaskInfo) => void;
 }
 
 function DailyAgenda(props: Props) {
@@ -61,6 +62,13 @@ function DailyAgenda(props: Props) {
                   dragHandleProps={provided.dragHandleProps}
                   onEdit={(item) => {
                     props.onEditTask({
+                      id: item.id,
+                      taskName: item.title,
+                      slot: props.day,
+                    });
+                  }}
+                  onClone={(item) => {
+                    props.onCloneTask({
                       id: item.id,
                       taskName: item.title,
                       slot: props.day,

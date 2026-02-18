@@ -1,8 +1,10 @@
-import { ActionIcon, Flex, Typography } from '@mantine/core';
+import { ActionIcon, Flex, Menu, Typography } from '@mantine/core';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { Task } from '../utils/Types';
 
 interface TaskItemProps {
@@ -10,6 +12,7 @@ interface TaskItemProps {
   onToggleCompleted: (item: Task) => void;
   onDelete: (item: Task) => void;
   onEdit: (item: Task) => void;
+  onClone?: (item: Task) => void;
   innerRef?: (element: HTMLElement | null) => any;
   draggableProps?: any;
   dragHandleProps?: any;
@@ -20,6 +23,7 @@ const TaskItem = ({
   onToggleCompleted,
   onDelete,
   onEdit,
+  onClone,
   innerRef,
   draggableProps,
   dragHandleProps,
@@ -51,20 +55,41 @@ const TaskItem = ({
     >
       {item.title}
     </Typography>
-    <ActionIcon
-      onClick={() => onEdit(item)}
-      variant="transparent"
-      style={{ justifySelf: 'flex-end' }}
+
+    <Menu
+      width={150}
+      position="bottom-end"
     >
-      <EditIcon fontSize="small" />
-    </ActionIcon>
-    <ActionIcon
-      onClick={() => onDelete(item)}
-      variant="transparent"
-      style={{ justifySelf: 'flex-end' }}
-    >
-      <DeleteIcon fontSize="small" />
-    </ActionIcon>
+      <Menu.Target>
+        <ActionIcon variant="transparent">
+          <MoreHorizIcon fontSize="small" />
+        </ActionIcon>
+      </Menu.Target>
+
+      <Menu.Dropdown>
+        <Menu.Label>Actions</Menu.Label>
+        <Menu.Item
+          leftSection={<EditIcon fontSize="small" />}
+          onClick={() => onEdit(item)}
+        >
+          Edit
+        </Menu.Item>
+        {onClone && (
+          <Menu.Item
+            leftSection={<ContentCopyIcon fontSize="small" />}
+            onClick={() => onClone(item)}
+          >
+            Clone
+          </Menu.Item>
+        )}
+        <Menu.Item
+          leftSection={<DeleteIcon fontSize="small" />}
+          onClick={() => onDelete(item)}
+        >
+          Delete
+        </Menu.Item>
+      </Menu.Dropdown>
+    </Menu>
   </Flex>
 );
 
