@@ -20,9 +20,9 @@ function TimeCalculator() {
   const [isEnterDur, setIsEnterDur] = useState(true);
   const [isDisp, setIsDisp] = useState(false);
   const [disp, setDisp] = useState({
-    depTimeStr: '',
-    sleepTimeStr: '',
-    wakeTimeStr: '',
+    depTimeStr: '-',
+    sleepTimeStr: '-',
+    wakeTimeStr: '-',
   });
 
   let depTimeCalc: Date | null = null;
@@ -70,121 +70,108 @@ function TimeCalculator() {
         : null;
 
     let depTimeStr = !depTimeCalc
-      ? ''
+      ? '-'
       : format(depTimeCalc, 'dd/MM/yyyy, hh:mm a');
     let sleepTimeStr = !sleepTime
-      ? ''
+      ? '-'
       : format(sleepTime, 'dd/MM/yyyy, hh:mm a');
-    let wakeTimeStr = !wakeTime ? '' : format(wakeTime, 'dd/MM/yyyy, hh:mm a');
+    let wakeTimeStr = !wakeTime ? '-' : format(wakeTime, 'dd/MM/yyyy, hh:mm a');
 
-    setIsDisp(() => depTimeStr !== '');
+    setIsDisp(() => depTimeStr !== '-');
     setDisp({
       depTimeStr: depTimeStr,
       sleepTimeStr: sleepTimeStr,
       wakeTimeStr: wakeTimeStr,
     });
-
-    // console.log(
-    //   'depTime',
-    //   depTimeStr,
-    //   'sleepTime',
-    //   sleepTimeStr,
-    //   'wakeTime',
-    //   wakeTimeStr
-    // );
   };
 
-  let theme = createTheme(lightTheme);
-
   return (
-    <ThemeProvider theme={theme}>
-      <WidgetBox>
-        <Title
-          order={3}
-          style={{ marginBottom: '0.5rem' }}
-        >
-          Prep Time Planner
-        </Title>
+    <WidgetBox>
+      <Title
+        order={3}
+        style={{ marginBottom: '0.5rem' }}
+      >
+        Prep Time Planner
+      </Title>
 
-        <Grid>
-          {isEnterDur && (
-            <Grid.Col span={12}>
-              <DateTimeField
-                label="Arrive at destination by"
-                onChange={(t) => (t == null ? null : setArrTime(new Date(t)))}
-                value={arrTime}
-                required
-                // style={{ margin: '4px 0px' }}
-              />
-            </Grid.Col>
+      <Grid>
+        {isEnterDur && (
+          <Grid.Col span={12}>
+            <DateTimeField
+              label="Arrive at destination by"
+              onChange={(t) => (t == null ? null : setArrTime(new Date(t)))}
+              value={arrTime}
+              required
+              // style={{ margin: '4px 0px' }}
+            />
+          </Grid.Col>
+        )}
+
+        <Grid.Col span={12}>
+          {isEnterDur ? (
+            <TimeField
+              id="travelDur"
+              label="Travel duration [HH:mm]"
+              onChange={(d) => setTravelDur(d)}
+              style={{ margin: '4px 0px' }}
+              required
+            />
+          ) : (
+            <DateTimeField
+              label="Depart by"
+              onChange={(t) => (t == null ? null : setDepTime(new Date(t)))}
+              value={depTime}
+              style={{ margin: '4px 0px' }}
+              required
+            />
           )}
 
-          <Grid.Col span={12}>
-            {isEnterDur ? (
-              <TimeField
-                id="travelDur"
-                label="Travel duration [HH:mm]"
-                onChange={(d) => setTravelDur(d)}
-                style={{ margin: '4px 0px' }}
-                required
-              />
-            ) : (
-              <DateTimeField
-                label="Depart by"
-                onChange={(t) => (t == null ? null : setDepTime(new Date(t)))}
-                value={depTime}
-                style={{ margin: '4px 0px' }}
-                required
-              />
-            )}
-
-            <Button
-              aria-label="switchInputType"
-              onClick={() => setIsEnterDur(!isEnterDur)}
-              style={{ fontSize: '0.8rem' }}
-              variant="subtle"
-            >
-              {isEnterDur
-                ? 'Enter departure time instead'
-                : 'Enter commute duration instead'}
-            </Button>
-          </Grid.Col>
-
-          <Grid.Col span={12}>
-            <TimeField
-              id="prepDur"
-              label="Preparation duration [HH:mm]"
-              onChange={(d) => setPrepDur(d)}
-              style={{ margin: '4px 0px' }}
-            />
-          </Grid.Col>
-
-          <Grid.Col span={12}>
-            <TimeField
-              id="sleepDur"
-              label="Sleep duration [HH:mm]"
-              onChange={(d) => setSleepDur(d)}
-              style={{ margin: '4px 0px' }}
-            />
-          </Grid.Col>
-
-          <PillButton
-            onClick={() => calc()}
-            style={{ margin: '1rem 0px', width: '100%' }}
+          <Button
+            aria-label="switchInputType"
+            onClick={() => setIsEnterDur(!isEnterDur)}
+            style={{ fontSize: '0.8rem' }}
+            variant="subtle"
           >
-            Calculate
-          </PillButton>
+            {isEnterDur
+              ? 'Enter departure time instead'
+              : 'Enter commute duration instead'}
+          </Button>
+        </Grid.Col>
 
-          {isDisp && (
-            <Grid.Col span={12}>
-              <Typography>💤 Sleep by: {disp.sleepTimeStr}</Typography>
-              <Typography>⏰ Wake by: {disp.wakeTimeStr}</Typography>
-              <Typography>🚌 Depart by: {disp.depTimeStr}</Typography>
-            </Grid.Col>
-          )}
-        </Grid>
-      </WidgetBox>
-    </ThemeProvider>
+        <Grid.Col span={12}>
+          <TimeField
+            id="prepDur"
+            label="Preparation duration [HH:mm]"
+            onChange={(d) => setPrepDur(d)}
+            style={{ margin: '4px 0px' }}
+          />
+        </Grid.Col>
+
+        <Grid.Col span={12}>
+          <TimeField
+            id="sleepDur"
+            label="Sleep duration [HH:mm]"
+            onChange={(d) => setSleepDur(d)}
+            style={{ margin: '4px 0px' }}
+          />
+        </Grid.Col>
+
+        <PillButton
+          onClick={() => calc()}
+          style={{ margin: '1rem 0px', width: '100%' }}
+        >
+          Calculate
+        </PillButton>
+
+        {isDisp && (
+          <Grid.Col span={12}>
+            <Typography>💤 Sleep by: {disp.sleepTimeStr}</Typography>
+            <Typography>⏰ Start preparing by: {disp.wakeTimeStr}</Typography>
+            <Typography>🚌 Depart by: {disp.depTimeStr}</Typography>
+          </Grid.Col>
+        )}
+      </Grid>
+    </WidgetBox>
   );
 }
 

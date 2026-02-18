@@ -6,6 +6,7 @@ import { getCookie } from './utils/Utils';
 import SchedulePlanner from './components/SchedulePlanner';
 import '@mantine/core/styles.css';
 import {
+  Accordion,
   Box,
   Grid,
   MantineProvider,
@@ -61,8 +62,26 @@ function App() {
                 <WeeklyPlanner token={token} />
               </Grid.Col>
 
-              <Grid.Col span={{ xs: 12, md: 6, lg: 4 }}>
-                <TimeCalculator />
+              <Grid.Col>
+                <Accordion>
+                  <Accordion.Item value="time-planning-tools">
+                    <Accordion.Control>
+                      <Title
+                        order={2}
+                        style={{ marginBottom: '0.5rem' }}
+                      >
+                        Time Planning Tools
+                      </Title>
+                    </Accordion.Control>
+                    <Accordion.Panel>
+                      <Grid>
+                        <Grid.Col span={{ xs: 12, md: 6, lg: 4 }}>
+                          <TimeCalculator />
+                        </Grid.Col>
+                      </Grid>
+                    </Accordion.Panel>
+                  </Accordion.Item>
+                </Accordion>
               </Grid.Col>
             </Grid>
           </Grid.Col>
