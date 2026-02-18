@@ -69,6 +69,8 @@ export const AddTaskDialog = (props: AddTaskDialogProps) => {
         <Grid>
           <Grid.Col span={12}>
             <TextInput
+              data-autofocus
+              autoComplete="off"
               id="task-name"
               label="Task name"
               key={form.key('taskName')}
