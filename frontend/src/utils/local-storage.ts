@@ -1,4 +1,4 @@
-import { scheduleData } from './Schedules';
+import { createScheduleData } from './Schedules';
 import { taskData } from './Tasks';
 import { TaskMap } from './Types';
 
@@ -11,7 +11,7 @@ export const getLocalStorage = (): AppLocalStorage => {
   const storage = localStorage.getItem('intentData');
 
   if (!storage) {
-    return { tasks: taskData, schedules: scheduleData };
+    return { tasks: taskData, schedules: createScheduleData() };
   }
 
   return JSON.parse(storage);
@@ -31,7 +31,7 @@ export const getStorageSchedules = (): TaskMap => {
   const storage = getLocalStorage();
 
   if (!storage) {
-    return scheduleData;
+    return createScheduleData();
   }
 
   return storage.schedules;

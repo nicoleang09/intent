@@ -5,7 +5,7 @@ import { Task, TaskMap } from './Types';
 export const reorder = (
   list: any[],
   startIdx: number,
-  endIdx: number
+  endIdx: number,
 ): any[] => {
   const res = Array.from(list);
   const [removed] = res.splice(startIdx, 1);
@@ -33,7 +33,7 @@ const updatedScheduleHour = (task: Task, destName: string) => {
 export const reorderSchedules = (
   tasks: TaskMap,
   source: DraggableLocation,
-  dest: DraggableLocation
+  dest: DraggableLocation,
 ) => {
   const curr = [...tasks[source.droppableId]];
   const next = [...tasks[dest.droppableId]];
@@ -65,10 +65,10 @@ export const reorderSchedules = (
 export const reorderSessionSchedules = (
   tasks: TaskMap,
   source: DraggableLocation,
-  dest: DraggableLocation
+  dest: DraggableLocation,
 ) => {
   const curr = [...tasks[source.droppableId]];
-  const next = [...tasks[dest.droppableId]];
+  const next = [...(tasks[dest.droppableId] ?? [])];
   const target = curr[source.index];
 
   if (source.droppableId === dest.droppableId) {

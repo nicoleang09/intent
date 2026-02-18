@@ -10,9 +10,9 @@ import {
 } from '../utils/ReorderSchedules';
 import {
   addSchedule,
+  createScheduleData,
   deleteSchedule,
   getAllSchedules,
-  scheduleData,
   updateScheduleCompleted,
 } from '../utils/Schedules';
 import { hourList } from '../utils/Utils';
@@ -32,7 +32,7 @@ interface TimeBlockProps {
 
 function SchedulePlanner(props: TimeBlockProps) {
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const [schedules, setSchedules] = useState<TaskMap>(scheduleData);
+  const [schedules, setSchedules] = useState<TaskMap>(createScheduleData());
   const [existingValue, setExistingValue] = useState<AddTaskInfo>({
     taskName: '',
     slot: hourList[0],
@@ -104,7 +104,7 @@ function SchedulePlanner(props: TimeBlockProps) {
     if (!taskName || !slot) return;
 
     // There is already a schedule at that time slot
-    if (schedules['h' + slot]?.length !== 0) {
+    if (schedules['h' + slot] && schedules['h' + slot].length !== 0) {
       notifications.show({
         color: 'red',
         title: 'Error',
@@ -220,17 +220,20 @@ function SchedulePlanner(props: TimeBlockProps) {
 
         <Grid>
           <DragDropContext onDragEnd={handleOnDragEnd}>
-            {Object.entries(schedules).map(([key, val]) => (
-              <HourlyAgenda
-                internalScroll
-                key={key}
-                hour={key}
-                dailyTasks={val}
-                onToggleCompleted={toggleCompleted}
-                onDelete={onDelete}
-                onEdit={(taskInfo) => openAddTaskDialog(taskInfo)}
-              />
-            ))}
+            {hourList.map((hour) => {
+              const key = `h${hour}`;
+              return (
+                <HourlyAgenda
+                  internalScroll
+                  key={key}
+                  hour={key}
+                  dailyTasks={schedules[key] ?? []}
+                  onToggleCompleted={toggleCompleted}
+                  onDelete={onDelete}
+                  onEdit={(taskInfo) => openAddTaskDialog(taskInfo)}
+                />
+              );
+            })}
           </DragDropContext>
         </Grid>
       </WidgetBox>
