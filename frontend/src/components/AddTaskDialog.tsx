@@ -52,6 +52,7 @@ export const AddTaskDialog = (props: AddTaskDialogProps) => {
       title={props.existingValue?.id ? 'Edit Task' : 'Add New Task'}
       onClose={handleClose}
       centered
+      withCloseButton={false}
     >
       <form
         onSubmit={(event) => {

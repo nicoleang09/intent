@@ -19,6 +19,7 @@ import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
 import { Notifications } from '@mantine/notifications';
 import { getSessionToken } from './utils/session-storage';
+import { mantineTheme } from './MantineTheme';
 
 function App() {
   // const [cookie, setCookie] = useState('');
@@ -33,7 +34,7 @@ function App() {
   // }, []);
 
   return (
-    <MantineProvider>
+    <MantineProvider theme={mantineTheme}>
       <Notifications />
       <Box
         display="flex"

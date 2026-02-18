@@ -18,6 +18,7 @@ import { Button, Grid, Title } from '@mantine/core';
 import { AddTaskDialog, AddTaskInfo } from './AddTaskDialog';
 import { v4 as uuidv4 } from 'uuid';
 import { getStorageTasks, setStorageTasks } from '../utils/local-storage';
+import { PlannerActionMenu } from './PlannerActionMenu';
 
 interface WeeklyPlannerProps {
   token?: string;
@@ -153,6 +154,38 @@ function WeeklyPlanner(props: WeeklyPlannerProps) {
     // });
   };
 
+  const uncheckAllTasks = () => {
+    const updatedTasks: TaskMap = Object.fromEntries(
+      Object.entries(tasks).map(([day, dayTasks]) => [
+        day,
+        dayTasks.map((task) =>
+          task.isCompleted ? { ...task, isCompleted: false } : task,
+        ),
+      ]),
+    );
+
+    setTasks(updatedTasks);
+    setStorageTasks(updatedTasks);
+
+    if (!props.token) return;
+
+    Object.values(updatedTasks)
+      .flat()
+      .forEach((task) => {
+        if (task.isCompleted === false) {
+          updateTaskCompleted(Number(task.id), false);
+        }
+      });
+  };
+
+  const deleteAllTasks = () => {
+    setTasks(taskData);
+    setStorageTasks(taskData);
+
+    if (!props.token) return;
+    // TODO: Implement API functionality
+  };
+
   const openAddTaskDialog = (taskInfo?: AddTaskInfo) => {
     setDialogOpen(true);
     setExistingValue(taskInfo || { taskName: '', slot: dayList[0] });
@@ -161,20 +194,34 @@ function WeeklyPlanner(props: WeeklyPlannerProps) {
   return (
     <>
       <WidgetBox>
-        <Grid style={{ marginBottom: '1rem', alignItems: 'center' }}>
-          <Title
-            order={2}
-            style={{ marginRight: '0.5rem', flexGrow: 1 }}
-          >
-            This week...
-          </Title>
-          <Button
-            variant="light"
-            radius="xl"
-            onClick={() => openAddTaskDialog()}
-          >
-            <AddIcon fontSize="small" /> Add
-          </Button>
+        <Grid
+          style={{ marginBottom: '1rem', alignItems: 'center' }}
+          align="center"
+          gutter={8}
+        >
+          <Grid.Col span="auto">
+            <Title
+              order={2}
+              style={{ marginRight: '0.5rem', flexGrow: 1 }}
+            >
+              This week...
+            </Title>
+          </Grid.Col>
+          <Grid.Col span="content">
+            <Button
+              variant="light"
+              radius="xl"
+              onClick={() => openAddTaskDialog()}
+            >
+              <AddIcon fontSize="small" /> Add
+            </Button>
+          </Grid.Col>
+          <Grid.Col span="content">
+            <PlannerActionMenu
+              onUncheckAll={uncheckAllTasks}
+              onDeleteAll={deleteAllTasks}
+            />
+          </Grid.Col>
         </Grid>
 
         <Grid gutter={20}>

@@ -25,6 +25,7 @@ import {
   getStorageSchedules,
   setStorageSchedules,
 } from '../utils/local-storage';
+import { PlannerActionMenu } from './PlannerActionMenu';
 
 interface TimeBlockProps {
   token?: string;
@@ -188,6 +189,39 @@ function SchedulePlanner(props: TimeBlockProps) {
     // });
   };
 
+  const uncheckAllTasks = () => {
+    const updatedTasks: TaskMap = Object.fromEntries(
+      Object.entries(schedules).map(([hour, hourTasks]) => [
+        hour,
+        hourTasks.map((task) =>
+          task.isCompleted ? { ...task, isCompleted: false } : task,
+        ),
+      ]),
+    );
+
+    setSchedules(updatedTasks);
+    setStorageSchedules(updatedTasks);
+
+    if (!props.token) return;
+
+    Object.values(updatedTasks)
+      .flat()
+      .forEach((task) => {
+        if (task.isCompleted === false) {
+          updateScheduleCompleted(Number(task.id), false);
+        }
+      });
+  };
+
+  const deleteAllTasks = () => {
+    const emptySchedules = createScheduleData();
+    setSchedules(emptySchedules);
+    setStorageSchedules(emptySchedules);
+
+    if (!props.token) return;
+    // TODO: Implement API functionality
+  };
+
   const openAddTaskDialog = (taskInfo?: AddTaskInfo) => {
     setDialogOpen(true);
     setExistingValue({
@@ -200,22 +234,33 @@ function SchedulePlanner(props: TimeBlockProps) {
     <>
       <WidgetBox>
         <Grid
-          align={'center'}
-          style={{ marginBottom: '1rem' }}
+          style={{ marginBottom: '1rem', alignItems: 'center' }}
+          align="center"
+          gutter={8}
         >
-          <Title
-            order={2}
-            style={{ marginRight: '0.5rem', flexGrow: 1 }}
-          >
-            Today...
-          </Title>
-          <Button
-            variant="light"
-            radius="xl"
-            onClick={() => openAddTaskDialog()}
-          >
-            <AddIcon fontSize="small" /> Add
-          </Button>
+          <Grid.Col span="auto">
+            <Title
+              order={2}
+              style={{ marginRight: '0.5rem', flexGrow: 1 }}
+            >
+              Today...
+            </Title>
+          </Grid.Col>
+          <Grid.Col span="content">
+            <Button
+              variant="light"
+              radius="xl"
+              onClick={() => openAddTaskDialog()}
+            >
+              <AddIcon fontSize="small" /> Add
+            </Button>
+          </Grid.Col>
+          <Grid.Col span="content">
+            <PlannerActionMenu
+              onUncheckAll={uncheckAllTasks}
+              onDeleteAll={deleteAllTasks}
+            />
+          </Grid.Col>
         </Grid>
 
         <Grid>
